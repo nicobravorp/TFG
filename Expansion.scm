@@ -1,4 +1,4 @@
-(define (script-fu-expandir-seleccion imagen capa factor)
+(define (script-fu-expand imagen capa factor)
   (let* (
          ; Validar si hay selección activa
          (hay-seleccion (= (car (gimp-selection-is-empty imagen)) FALSE))
@@ -51,8 +51,8 @@
             (gimp-image-undo-group-end imagen)))))
 
 (script-fu-register
- "script-fu-expandir-seleccion"
- "Expandir Selección"
+ "script-fu-expand"
+ "Expand"
  "Duplica y expande solo la selección activa usando interpolación cúbica"
  "Nicolas Bravo"
  "Nicolas Bravo"
@@ -62,4 +62,4 @@
  SF-DRAWABLE "Capa" 0
  SF-ADJUSTMENT "Factor de expansión" '(1.5 0.1 10.0 0.1 1 2))
 
-(script-fu-menu-register "script-fu-expandir-seleccion" "<Image>/Filters/Custom")
+(script-fu-menu-register "script-fu-expand" "<Image>/Filters/Custom")
