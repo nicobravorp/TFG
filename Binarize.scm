@@ -13,8 +13,11 @@
                    filename)))
     base))
 
-(define (script-fu-binarize input-path output-dir umbral)
+(define (script-fu-binarize input-path output-dir umbral custom-name)
   (gimp-message "Inicio de script")
+
+  ; Asegurar que custom-name sea una cadena
+  (set! custom-name (if (string? custom-name) custom-name ""))
 
   (let* (
          (image (car (gimp-file-load RUN-NONINTERACTIVE input-path input-path)))
@@ -29,7 +32,12 @@
          (output-dir-clean (if (string-suffix? "/" output-dir)
                                (substring output-dir 0 (- (string-length output-dir) 1))
                                output-dir))
-         (output-name (string-append output-dir-clean "/" basename "_binarized.png"))
+         (filename (if (string=? custom-name "")
+                       (string-append basename "_binarized.png")
+                       (if (string-suffix? ".png" custom-name)
+                           custom-name
+                           (string-append custom-name ".png"))))
+         (output-name (string-append output-dir-clean "/" filename))
         )
 
     (gimp-message (string-append "DEBUG output-name = [" output-name "]"))
@@ -55,13 +63,14 @@
  "script-fu-binarize"
  "Binarize"
  "Carga una imagen, aplica binarización y guarda el resultado."
- "Nicolas Bravo"
- "Nicolas Bravo"
+ "Nicolás Bravo"
+ "Nicolás Bravo"
  "2025"
  ""
  SF-FILENAME "Archivo de imagen" ""
  SF-DIRNAME  "Directorio de salida" ""
  SF-ADJUSTMENT "Umbral" '(128 0 255 1 10 0 0)
+ SF-STRING "Nombre del archivo de salida (vacío = automático)" ""
 )
 
 (script-fu-menu-register "script-fu-binarize" "<Image>/Filters/Custom")
