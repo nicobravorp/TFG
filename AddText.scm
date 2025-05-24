@@ -1,57 +1,40 @@
-(define valid-formats '("jpg" "jpeg" "png" "bmp" "tiff" "webp" "xcf"))
-
-(define (script-fu-convert-image-format input-path output-dir format-index custom-name)
+(define (script-fu-add-text img drawable text pos-x-percent pos-y-percent font size opacity color)
   (let* (
-         ; Obtener el formato real a partir del índice seleccionado
-         (format (list-ref valid-formats format-index))
-
-         ; Verificar que el formato está en la lista (repetido aquí por seguridad si se invoca desde terminal)
-         (format-valid? (member format valid-formats))
-
-         ; Cargar imagen
-         (image (car (gimp-file-load RUN-NONINTERACTIVE input-path input-path)))
-
-         ; Extraer nombre original
-         (path-parts (list->vector (strbreakup input-path "/")))
-         (filename (vector-ref path-parts (- (vector-length path-parts) 1)))
-         (name-parts (list->vector (strbreakup filename ".")))
-         (name-no-ext (vector-ref name-parts 0))
-
-         ; Usar custom-name si no está vacío
-         (final-name (if (string=? custom-name "")
-                         name-no-ext
-                         custom-name))
-
-         (output-filename (string-append output-dir "/" final-name "." format))
+         (width (car (gimp-image-get-width img)))
+         (height (car (gimp-image-get-height img)))
+         (pos-x (truncate (* (/ pos-x-percent 100) width)))
+         (pos-y (truncate (* (/ pos-y-percent 100) height)))
         )
-
-    ; Verificar formato
-    (if (not format-valid?)
-        (begin
-          (gimp-message (string-append "Error: formato no válido: " format))
-          (error "Formato de salida no admitido.")))
-
-    ; Guardar imagen
-    (gimp-file-save RUN-NONINTERACTIVE image output-filename output-filename)
-
-    ; Cerrar imagen
-    (gimp-image-delete image)
-    (gimp-message (string-append "Imagen guardada como: " output-filename))
-  )
-)
+    ; Establecer color antes de crear la capa de texto
+    (gimp-context-set-foreground color)
+    (let* (
+           (text-layer (car (gimp-text-layer-new img text font size PIXELS)))
+           (text-width (car (gimp-drawable-get-width text-layer)))
+           (text-height (car (gimp-drawable-get-height text-layer)))
+           (final-x (- pos-x (/ text-width 2)))
+           (final-y (- pos-y (/ text-height 2)))
+          )
+      (gimp-image-insert-layer img text-layer 0 -1)
+      (gimp-layer-set-offsets text-layer final-x final-y)
+      (gimp-layer-set-opacity text-layer opacity)
+      (gimp-displays-flush))))
 
 (script-fu-register
- "script-fu-convert-image-format"
- "Convert Image Format"
- "Convierte una imagen a otro formato"
- "Nicolás Bravo"
- "Nicolás Bravo"
+ "script-fu-add-text"
+ "Add Text"
+ "Añade una capa de texto sobre la imagen."
+ "Nicolas Bravo"
+ "Nicolas Bravo"
  "2025"
- ""
- SF-FILENAME "Imagen de entrada" ""
- SF-DIRNAME  "Carpeta de salida" ""
- SF-OPTION   "Formato de salida" '("jpg" "jpeg" "png" "bmp" "tiff" "webp" "xcf")
- SF-STRING   "Nombre de salida" ""
-)
+ "RGB*, GRAY*"
+ SF-IMAGE      "Imagen"               0
+ SF-DRAWABLE   "Capa activa"          0
+ SF-STRING     "Texto"                "Texto"
+ SF-ADJUSTMENT "Posición X (%)"      '(50 0 100 1 10 0 1)
+ SF-ADJUSTMENT "Posición Y (%)"      '(50 0 100 1 10 0 1)
+ SF-FONT       "Fuente"               "Sans"
+ SF-ADJUSTMENT "Tamaño fuente"       '(30 1 500 1 10 0 1)
+ SF-ADJUSTMENT "Opacidad (%)"        '(100 0 100 1 10 0 1)
+ SF-COLOR      "Color del texto"     '(0 0 0))
 
-(script-fu-menu-register "script-fu-convert-image-format" "<Image>/Filters/Custom")
+(script-fu-menu-register "script-fu-add-text" "<Image>/Filters/Custom")
