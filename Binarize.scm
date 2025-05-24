@@ -69,8 +69,8 @@
  ""
  SF-FILENAME "Archivo de imagen" ""
  SF-DIRNAME  "Directorio de salida" ""
+ SF-STRING "Nombre del archivo de salida" ""
  SF-ADJUSTMENT "Umbral" '(128 0 255 1 10 0 0)
- SF-STRING "Nombre del archivo de salida (vacío = automático)" ""
 )
 
 (script-fu-menu-register "script-fu-binarize" "<Image>/Filters/Custom")
