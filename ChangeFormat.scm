@@ -1,9 +1,9 @@
 (define (script-fu-convert-image-format input-path output-dir format)
   (let* (
-         ;; Cargar imagen
+         ; Cargar imagen
          (image (car (gimp-file-load RUN-NONINTERACTIVE input-path input-path)))
 
-         ;; Construir nombre de salida
+         ; Construir nombre de salida
          (path-parts (list->vector (strbreakup input-path "/")))
          (filename (vector-ref path-parts (- (vector-length path-parts) 1)))
          (name-parts (list->vector (strbreakup filename ".")))
@@ -11,10 +11,10 @@
          (output-filename (string-append output-dir "/" name-no-ext "." format))
         )
 
-    ;; Guardar/exportar con gimp-file-save
+    ; Guardar/exportar con gimp-file-save
     (gimp-file-save RUN-NONINTERACTIVE image output-filename output-filename #f)
 
-    ;; Cerrar imagen
+    ; Cerrar imagen
     (gimp-image-delete image)
     (gimp-message (string-append "Imagen guardada como: " output-filename))
   )
