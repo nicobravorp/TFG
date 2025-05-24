@@ -42,8 +42,8 @@
 
 (script-fu-register
  "script-fu-convert-image-format"
- "Convert Image Forma"
- "Convierte una imagen a otro formato, con validación y nombre opcional"
+ "Convert Image Format"
+ "Convierte una imagen a otro formato"
  "Nicolás Bravo"
  "Nicolás Bravo"
  "2025"
