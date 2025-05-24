@@ -51,7 +51,7 @@
  SF-FILENAME "Imagen de entrada" ""
  SF-DIRNAME  "Carpeta de salida" ""
  SF-OPTION   "Formato de salida" '("jpg" "jpeg" "png" "bmp" "tiff" "webp" "xcf")
- SF-STRING   "Nombre de salida (vacío para usar nombre original)" ""
+ SF-STRING   "Nombre de salida" ""
 )
 
 (script-fu-menu-register "script-fu-convert-image-format" "<Image>/Filters/Custom")
