@@ -5,7 +5,7 @@
          (<= (abs (- g1 g2)) tolerance)
          (<= (abs (- b1 b2)) tolerance))))
 
-(define (script-fu-highlight-region img drawable tolerance margin xref yref)
+(define (script-fu-highlight-region img drawable tolerance margin xref yref mode highlight-color user-opacity)
   (let* (
          (w (car (gimp-image-get-width img)))
          (h (car (gimp-image-get-height img)))
@@ -15,9 +15,11 @@
          (ymin (max 0 (- yref margin)))
          (ymax (min (- h 1) (+ yref margin)))
          (new-layer (car (gimp-layer-new img "Color Similar" w h RGBA-IMAGE 100 LAYER-MODE-NORMAL)))
+         (alpha (inexact->exact (round (* 2.55 user-opacity)))) ; convierte de 0–100 a 0–255
         )
 
     (gimp-image-insert-layer img new-layer 0 -1)
+    (gimp-drawable-fill new-layer 4) ; FILL-TRANSPARENT
 
     (do ((x xmin (+ x 1)))
         ((> x xmax))
@@ -25,17 +27,25 @@
           ((> y ymax))
         (let* ((p (car (gimp-drawable-get-pixel drawable x y))))
           (when (color-similar? p color-ref tolerance)
-            (gimp-drawable-set-pixel new-layer x y p)))))
+            (if (= mode 0)
+                ;; Color original
+                (gimp-drawable-set-pixel new-layer x y p)
+                ;; Color resaltado
+                (gimp-drawable-set-pixel new-layer x y
+                  (list (list-ref highlight-color 0)
+                        (list-ref highlight-color 1)
+                        (list-ref highlight-color 2)
+                        alpha)))))))
 
     (gimp-displays-flush)
-    (gimp-message "Región resaltada en una nueva capa con colores originales.")))
+    (gimp-message "Región resaltada en nueva capa.")))
 
 (script-fu-register
  "script-fu-highlight-region"
  "Highlight Region"
- "Crea una nueva capa con los píxeles similares al indicado (coordenadas manuales)"
- "Nicolas Bravo"
- "Nicolas Bravo"
+ "Crea una nueva capa con los píxeles similares al indicado (coordenadas manuales). Se puede resaltar con el color original o un color personalizado."
+ "Nicolás Bravo"
+ "Nicolás Bravo"
  "2025"
  "RGB*, GRAY*"
  SF-IMAGE      "Imagen"     0
@@ -44,7 +54,11 @@
  SF-ADJUSTMENT "Margen (px)" '(20 1 200 1 10 0)
  SF-ADJUSTMENT "Coordenada X del píxel" '(0 0 10000 1 10 0)
  SF-ADJUSTMENT "Coordenada Y del píxel" '(0 0 10000 1 10 0)
+ SF-OPTION     "Modo de resaltado" '("Color original" "Color resaltado")
+ SF-COLOR      "Color resaltado" '(255 0 0)
+ SF-ADJUSTMENT "Opacidad (0–100)" '(50 0 100 1 5 0)
 )
 
 (script-fu-menu-register "script-fu-highlight-region"
                          "<Image>/Filters/Custom")
+
