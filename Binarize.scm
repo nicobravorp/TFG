@@ -13,7 +13,7 @@
                    filename)))
     base))
 
-(define (script-fu-binarize-from-file input-path output-dir umbral)
+(define (script-fu-binarize input-path output-dir umbral)
   (gimp-message "Inicio de script")
 
   (let* (
@@ -52,11 +52,11 @@
 )
 
 (script-fu-register
- "script-fu-binarize-from-file"
- "Binarize From File"
- "Carga una imagen, aplica binarización y guarda el resultado como PNG."
- "Nicolás Bravo"
- "Nicolás Bravo"
+ "script-fu-binarize"
+ "Binarize"
+ "Carga una imagen, aplica binarización y guarda el resultado."
+ "Nicolas Bravo"
+ "Nicolas Bravo"
  "2025"
  ""
  SF-FILENAME "Archivo de imagen" ""
@@ -64,4 +64,4 @@
  SF-ADJUSTMENT "Umbral" '(128 0 255 1 10 0 0)
 )
 
-(script-fu-menu-register "script-fu-binarize-from-file" "<Image>/Filters/Custom")
+(script-fu-menu-register "script-fu-binarize" "<Image>/Filters/Custom")
