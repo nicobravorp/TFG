@@ -61,4 +61,3 @@
 
 (script-fu-menu-register "script-fu-highlight-region"
                          "<Image>/Filters/Custom")
-
