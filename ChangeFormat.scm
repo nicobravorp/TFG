@@ -1,28 +1,29 @@
+; Lista de formatos aceptados
 (define valid-formats '("jpg" "jpeg" "png" "bmp" "tiff" "webp" "xcf"))
 
-(define (script-fu-convert-image-format input-path output-dir format-index custom-name)
+(define (script-fu-convert-image-format path dir name exitformat)
   (let* (
-         ; Obtener el formato real a partir del índice seleccionado
-         (format (list-ref valid-formats format-index))
+         ; Obtener el formato real a partir del indice seleccionado
+         (format (list-ref valid-formats exitformat))
 
-         ; Verificar que el formato está en la lista (repetido aquí por seguridad si se invoca desde terminal)
+         ; Verificar que el formato está en la lista
          (format-valid? (member format valid-formats))
 
          ; Cargar imagen
-         (image (car (gimp-file-load RUN-NONINTERACTIVE input-path input-path)))
+         (image (car (gimp-file-load RUN-NONINTERACTIVE path path)))
 
          ; Extraer nombre original
-         (path-parts (list->vector (strbreakup input-path "/")))
+         (path-parts (list->vector (strbreakup path "/")))
          (filename (vector-ref path-parts (- (vector-length path-parts) 1)))
          (name-parts (list->vector (strbreakup filename ".")))
          (name-no-ext (vector-ref name-parts 0))
 
-         ; Usar custom-name si no está vacío
-         (final-name (if (string=? custom-name "")
+         ; Usar name si no está vacio
+         (final-name (if (string=? name "")
                          name-no-ext
-                         custom-name))
+                         name))
 
-         (output-filename (string-append output-dir "/" final-name "." format))
+         (output-filename (string-append dir "/" final-name "." format))
         )
 
     ; Verificar formato
@@ -43,15 +44,15 @@
 (script-fu-register
  "script-fu-convert-image-format"
  "Convert Image Format"
- "Convierte una imagen a otro formato"
- "Nicolás Bravo"
- "Nicolás Bravo"
+ "Convierte una imagen a otro formato."
+ "Nicolas Bravo"
+ "Nicolas Bravo"
  "2025"
  ""
  SF-FILENAME "Imagen de entrada" ""
  SF-DIRNAME  "Carpeta de salida" ""
+ SF-STRING   "Nombre de salida" ""
  SF-OPTION   "Formato de salida" '("jpg" "jpeg" "png" "bmp" "tiff" "webp" "xcf")
- SF-STRING   "Nombre de salida (vacío para usar nombre original)" ""
 )
 
-(script-fu-menu-register "script-fu-convert-image-format" "<Image>/Filters/Custom")
+(script-fu-menu-register "script-fu-convert-image-format" "<Image>/Filters/Script-Fu")
