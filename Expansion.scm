@@ -1,59 +1,55 @@
-(define (script-fu-expand imagen capa factor)
+(define (script-fu-expandir-seleccion img layer factor)
   (let* (
-         ; Validar si hay selección activa
-         (hay-seleccion (= (car (gimp-selection-is-empty imagen)) FALSE))
+         ; Validar si hay seleccion activa
+         (selection (= (car (gimp-selection-is-empty img)) FALSE))
         )
 
-    (if (not hay-seleccion)
-        (gimp-message "No hay ninguna selección activa.")
+    (if (not selection)
+        (gimp-message "No hay ninguna seleccion activa.")
         (begin
           ; Crear una copia de la capa activa
-          (let* (
-                 (nueva-capa (car (gimp-layer-copy capa TRUE)))
-                 (anchura (car (gimp-drawable-get-width capa)))
-                 (altura  (car (gimp-drawable-get-height capa)))
-                )
+          (let* ((new-layer (car (gimp-layer-copy layer TRUE))))
 
-            (gimp-image-undo-group-start imagen)
+            (gimp-image-undo-group-start img)
             (gimp-context-set-interpolation INTERPOLATION-CUBIC)
-            (gimp-image-insert-layer imagen nueva-capa 0 -1)
+            (gimp-image-insert-layer img new-layer 0 -1)
 
-            ; Aplicar máscara basada en la selección
-            (let ((mask (car (gimp-layer-create-mask nueva-capa ADD-MASK-SELECTION))))
-              (gimp-layer-add-mask nueva-capa mask)
-              (gimp-layer-remove-mask nueva-capa MASK-APPLY))
+            ; Aplicar mascara basada en la seleccion
+            (let ((mask (car (gimp-layer-create-mask new-layer ADD-MASK-SELECTION))))
+              (gimp-layer-add-mask new-layer mask)
+              (gimp-layer-remove-mask new-layer MASK-APPLY))
 
             ; Comprobar si la capa resultante contiene algo visible
-            (if (gimp-drawable-has-alpha nueva-capa)
+            (if (gimp-drawable-has-alpha new-layer)
                 (let* (
-                       (anchura-selec (car (gimp-drawable-get-width nueva-capa)))
-                       (altura-selec  (car (gimp-drawable-get-height nueva-capa)))
-                       (offsets (gimp-drawable-get-offsets nueva-capa))
+                       (width (car (gimp-drawable-get-width new-layer)))
+                       (height  (car (gimp-drawable-get-height new-layer)))
+                       (offsets (gimp-drawable-get-offsets new-layer))
                        (offset-x (car offsets))
                        (offset-y (cadr offsets))
-                       (nueva-anchura (* anchura-selec factor))
-                       (nueva-altura  (* altura-selec factor))
-                       (nuevo-offset-x (- offset-x (/ (- nueva-anchura anchura-selec) 2)))
-                       (nuevo-offset-y (- offset-y (/ (- nueva-altura altura-selec) 2)))
+                       (new-width (* width factor))
+                       (new-height  (* height factor))
+                       (new-offset-x (- offset-x (/ (- new-width width) 2)))
+                       (new-offset-y (- offset-y (/ (- new-height height) 2)))
                       )
 
                   ; Escalar y centrar
-                  (gimp-layer-scale nueva-capa nueva-anchura nueva-altura FALSE)
-                  (gimp-layer-set-offsets nueva-capa nuevo-offset-x nuevo-offset-y)
-                  (gimp-item-set-name nueva-capa "Selección Expandida"))
+                  (gimp-layer-scale new-layer new-width new-height FALSE)
+                  (gimp-layer-set-offsets new-layer new-offset-x new-offset-y)
+                  (gimp-item-set-name new-layer "Seleccion Expandida"))
 
-                ; Si no hay píxeles visibles, eliminar la capa nueva
+                ; Si no hay pixeles visibles, eliminar la capa nueva
                 (begin
-                  (gimp-image-remove-layer imagen nueva-capa)
-                  (gimp-message "La selección no contiene píxeles visibles."))))
+                  (gimp-image-remove-layer img new-layer)
+                  (gimp-message "La seleccion no contiene pixeles visibles."))))
 
             (gimp-displays-flush)
-            (gimp-image-undo-group-end imagen)))))
+            (gimp-image-undo-group-end img)))))
 
 (script-fu-register
- "script-fu-expand"
+ "script-fu-expandir-seleccion"
  "Expand"
- "Duplica y expande solo la selección activa usando interpolación cúbica"
+ "Duplica y expande solo la seleccion activa usando interpolacion cubica."
  "Nicolas Bravo"
  "Nicolas Bravo"
  "2025"
@@ -62,4 +58,4 @@
  SF-DRAWABLE "Capa" 0
  SF-ADJUSTMENT "Factor de expansión" '(1.5 0.1 10.0 0.1 1 2))
 
-(script-fu-menu-register "script-fu-expand" "<Image>/Filters/Custom")
+(script-fu-menu-register "script-fu-expandir-seleccion" "<Image>/Filters/Script-Fu")
