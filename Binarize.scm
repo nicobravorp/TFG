@@ -1,9 +1,11 @@
+; Funcion auxiliar que verifica si una cadena str termina en el sufijo suffix
 (define (string-suffix? suffix str)
   (let ((slen (string-length suffix))
         (len (string-length str)))
     (and (<= slen len)
          (string=? (substring str (- len slen) len) suffix))))
 
+; Funcion auxiliar que obtiene el nombre del archivo sin la extension a partir de una ruta completa
 (define (get-filename-without-extension path)
   (let* ((parts (strbreakup path "/"))
          (filename (list-ref parts (- (length parts) 1)))
@@ -13,64 +15,75 @@
                    filename)))
     base))
 
-(define (script-fu-binarize input-path output-dir umbral custom-name)
-  (gimp-message "Inicio de script")
+(define (script-fu-binarize path dir umbral name)
 
-  ; Asegurar que custom-name sea una cadena
-  (set! custom-name (if (string? custom-name) custom-name ""))
+  ; Asegurarse de que name es una cadena valida
+  (set! name (if (string? name) name ""))
 
   (let* (
-         (image (car (gimp-file-load RUN-NONINTERACTIVE input-path input-path)))
+         ; Carga la imagen desde disco
+         (image (car (gimp-file-load RUN-NONINTERACTIVE path path)))
+
+         ; Obtiene las capas de la imagen
          (layers (gimp-image-get-layers image))
+
+         ; Selecciona la primera capa o aplana la imagen si no hay ninguna
          (layer (if (and (vector? layers) (> (vector-length layers) 0))
                     (aref layers 0)
                     (begin
-                      (gimp-message "Vector vacío: usando gimp-image-flatten")
                       (car (gimp-image-flatten image)))))
+
+         ; Crea una copia de la capa para aplicar el filtro
          (copy (car (gimp-layer-copy layer TRUE)))
-         (basename (get-filename-without-extension input-path))
-         (output-dir-clean (if (string-suffix? "/" output-dir)
-                               (substring output-dir 0 (- (string-length output-dir) 1))
-                               output-dir))
-         (filename (if (string=? custom-name "")
+
+         ; Extrae el nombre base del archivo de entrada
+         (basename (get-filename-without-extension path))
+
+         ; Elimina una barra final en el directorio si la hay
+         (output-dir (if (string-suffix? "/" dir)
+                               (substring dir 0 (- (string-length dir) 1))
+                               dir))
+
+         ; Construye el nombre del archivo de salida
+         (filename (if (string=? name "")
                        (string-append basename "_binarized.png")
-                       (if (string-suffix? ".png" custom-name)
-                           custom-name
-                           (string-append custom-name ".png"))))
-         (output-name (string-append output-dir-clean "/" filename))
+                       (if (string-suffix? ".png" name)
+                           name
+                           (string-append name ".png"))))
+
+         ; Ruta completa de salida
+         (output-name (string-append output-dir "/" filename))
         )
 
-    (gimp-message (string-append "DEBUG output-name = [" output-name "]"))
-
+    ; Inserta la capa copiada en la imagen
     (gimp-image-insert-layer image copy 0 -1)
-    (gimp-message "Capa preparada")
 
+    ; Convierte a escala de grises
     (gimp-drawable-desaturate copy DESATURATE-LIGHTNESS)
-    (gimp-message "Desaturación aplicada")
 
+    ; Aplica umbral de binarizacion segun el valor dado
     (gimp-drawable-threshold copy HISTOGRAM-VALUE (/ umbral 255.0) 1.0)
-    (gimp-message "Umbral aplicado")
 
+    ; Guarda la imagen resultante
     (gimp-file-save RUN-NONINTERACTIVE image output-name #f)
-    (gimp-message (string-append "Guardado en: " output-name))
 
+    ; Elimina la imagen de la memoria
     (gimp-image-delete image)
-    (gimp-message "Imagen eliminada de la memoria")
   )
 )
 
 (script-fu-register
  "script-fu-binarize"
  "Binarize"
- "Carga una imagen, aplica binarización y guarda el resultado."
- "Nicolás Bravo"
- "Nicolás Bravo"
+ "Carga una imagen, aplica binarizacion y guarda el resultado."
+ "Nicolas Bravo"
+ "Nicolas Bravo"
  "2025"
  ""
  SF-FILENAME "Archivo de imagen" ""
  SF-DIRNAME  "Directorio de salida" ""
- SF-STRING "Nombre del archivo de salida" ""
  SF-ADJUSTMENT "Umbral" '(128 0 255 1 10 0 0)
+ SF-STRING "Nombre de salida" ""
 )
 
-(script-fu-menu-register "script-fu-binarize" "<Image>/Filters/Custom")
+(script-fu-menu-register "script-fu-binarize" "<Image>/Filters/Script-Fu")
