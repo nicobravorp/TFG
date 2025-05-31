@@ -1,5 +1,6 @@
 import cv2
 import argparse
+import os
 
 def main():
     parser = argparse.ArgumentParser(description="Cambiar el formato de una imagen usando OpenCV.")
@@ -16,11 +17,21 @@ def main():
         return
 
     # Determinar ruta de salida
-    path = args.exit_path if args.exit_path else f"{args.image.rsplit('.', 1)[0]}.{args.format}"
+    if args.exit_path:
+        root, ext = os.path.splitext(args.exit_path)
+        if not ext:
+            path = f"{args.exit_path}.{args.format}"
+        else:
+            path = args.exit_path
+    else:
+        path = f"{args.image.rsplit('.', 1)[0]}.{args.format}"
 
     # Guardar imagen en nuevo formato
-    cv2.imwrite(path, img)
-    print(f"Imagen guardada en: {path}")
+    result = cv2.imwrite(path, img)
+    if result:
+        print(f"Imagen guardada en: {path}")
+    else:
+        print(f"No se pudo guardar la imagen en el formato {args.format}")
 
 if __name__ == "__main__":
     main()
