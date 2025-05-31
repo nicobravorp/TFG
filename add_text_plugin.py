@@ -8,9 +8,9 @@ gi.require_version("Gimp", "3.0")
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gimp, GObject, Gtk
 
-class AddSimpleText(Gimp.PlugIn):
+class AddText(Gimp.PlugIn):
     def do_query_procedures(self):
-        return ["python-fu-add-simple-text"]
+        return ["python-fu-add-text"]
 
     def do_set_i18n(self, domain):
         return False
@@ -104,4 +104,4 @@ class AddSimpleText(Gimp.PlugIn):
 
         return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, None)
 
-Gimp.main(AddSimpleText.__gtype__, sys.argv)
+Gimp.main(AddText.__gtype__, sys.argv)
