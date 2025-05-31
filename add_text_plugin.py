@@ -87,9 +87,7 @@ class AddText(Gimp.PlugIn):
             dialog.destroy()
 
         else:
-            text = config.get_property("text")
-            x = config.get_property("x")
-            y = config.get_property("y")
+            return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, None)
 
         font = config.get_property("font")
         size = config.get_property("size")
